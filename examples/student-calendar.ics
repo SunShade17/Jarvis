@@ -1,0 +1,17 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Jarvis//Demo calendar//EN
+BEGIN:VEVENT
+UID:abstract-deadline@jarvis.example
+DTSTAMP:20261102T140000Z
+DTSTART;TZID=America/Toronto:20261106T170000
+SUMMARY:Deadline - Submit workshop abstract
+END:VEVENT
+BEGIN:VEVENT
+UID:prep-block@jarvis.example
+DTSTAMP:20261102T140000Z
+DTSTART;TZID=America/Toronto:20261104T150000
+DTEND;TZID=America/Toronto:20261104T160000
+SUMMARY:Work on sponsor deck
+END:VEVENT
+END:VCALENDAR

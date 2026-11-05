@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+.dayfold/
+.jarvis/
+node_modules/
+*.log
+/interview/
+/Pitch Deck/

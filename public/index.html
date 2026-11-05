@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#174e61" />
+    <meta name="description" content="Jarvis keeps your task list current as commitments change across meetings, email, and calendar entries." />
+    <title>Jarvis · Commitment tracker</title>
+    <link rel="icon" href="/mark.svg" />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <aside class="rail">
+      <div class="brand">
+        <img src="/mark.svg" width="39" height="39" alt="" />Jarvis
+      </div>
+      <div class="rail-section">
+        <p class="eyebrow">Workspace</p>
+        <nav id="nav" aria-label="Workspace views"></nav>
+      </div>
+      <div class="rail-section source-nav">
+        <p class="eyebrow">Capture from</p>
+        <nav id="sources" aria-label="Capture shortcuts"></nav>
+      </div>
+      <footer class="rail-foot">
+        <div class="avatar" id="avatar">A</div>
+        <div>
+          <strong id="owner">Andy</strong><small>Local workspace</small>
+        </div>
+      </footer>
+    </aside>
+    <main>
+      <div class="topbar">
+        <div class="crumb">
+          <span class="work-icon" data-icon="layers"></span
+          ><span>Workspace</span><span class="slash">/</span
+          ><b id="crumb">My tasks</b>
+        </div>
+        <label class="workspace-choice"
+          ><span data-icon="flask"></span
+          ><select id="space" aria-label="Switch workspace">
+            <option value="demo">Demo workspace</option>
+            <option value="personal">Personal workspace</option>
+          </select></label
+        >
+      </div>
+      <div class="main-pad">
+        <header class="page-head">
+          <div>
+            <p class="eyebrow accent">Commitment tracker</p>
+            <h1 id="heading">My tasks</h1>
+            <p id="subtitle" class="subtitle">
+              Your commitments, with the sources behind them.
+            </p>
+          </div>
+          <button class="small-btn mobile-capture" id="jump-capture"><span data-icon="capture"></span>Capture</button>
+        </header>
+        <div id="walkthrough"></div>
+        <div class="columns">
+          <section class="ledger-panel" aria-label="Workspace content">
+            <div id="list"></div>
+          </section>
+          <section class="capture" id="capture" aria-labelledby="capture-title">
+            <header class="capture-head">
+              <span class="capture-logo" data-icon="capture"></span>
+              <h2 id="capture-title">Capture</h2>
+            </header>
+            <form id="capture-form">
+              <label class="label" for="source-type">Source</label>
+              <div class="select-wrap">
+                <span id="source-icon"></span
+                ><select id="source-type">
+                  <option value="meeting">Meeting notes</option>
+                  <option value="email">Email</option>
+                  <option value="calendar">Calendar</option>
+                  <option value="quick">Quick capture</option>
+                </select>
+              </div>
+              <div class="field-title">
+                <label class="label" id="body-label" for="body"
+                  >Meeting notes</label
+                ><button type="button" id="example" class="link-btn">
+                  Use example
+                </button>
+              </div>
+              <textarea
+                id="body"
+                rows="6"
+                maxlength="16000"
+                required
+              ></textarea>
+              <button
+                type="button"
+                id="dictate"
+                class="dictate"
+                hidden
+              ></button>
+              <button type="button" class="dictate" id="import-calendar" hidden>
+                Import .ics file</button
+              ><input
+                type="file"
+                hidden
+                id="calendar-file"
+                accept=".ics,text/calendar"
+              />
+              <button type="button" class="dictate" id="shortcut-help" hidden>
+                Use /Todo: outside Jarvis
+              </button>
+              <details id="metadata">
+                <summary>Source details</summary>
+                <label class="label" for="source-label">Source title</label
+                ><input
+                  id="source-label"
+                  maxlength="100"
+                  placeholder="e.g. Partnerships check-in"
+                />
+                <div class="meta-row">
+                  <div>
+                    <label class="label" for="author">Author</label
+                    ><input id="author" maxlength="80" />
+                  </div>
+                  <div>
+                    <label class="label" for="source-date">Source date</label
+                    ><input id="source-date" type="date" required />
+                  </div>
+                </div>
+              </details>
+              <button type="submit" class="primary full" id="submit">
+                <span data-icon="capture"></span>Process source
+              </button>
+            </form>
+            <div class="engine">
+              <span class="engine-dot"></span
+              ><select id="engine-mode" aria-label="Extraction engine">
+                <option value="local">Local rules</option>
+                <option value="claude">Claude</option></select
+              ><button
+                class="icon-btn info"
+                id="engine-info"
+                aria-label="About the extraction engine"
+                data-icon="info"
+              ></button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+    <dialog id="dialog"><div id="dialog-content"></div></dialog>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
