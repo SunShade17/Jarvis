@@ -1020,3 +1020,14 @@ code {
 }
 .task-toolbar { flex-wrap: wrap; gap: .5rem; }
 .task-toolbar .seg { margin-left: auto; }
+.quick-row { display:block; margin-bottom:9px; }
+.quick-row:focus-within { border-color:var(--green); }
+.entry-line { display:flex; align-items:center; gap:11px; }
+.entry-plus { width:19px; text-align:center; color:var(--muted); font-size:20px; }
+.entry-line #new-title { min-width:0; flex:1; width:0; padding:2px 0; border:none; outline:0; box-shadow:none; background:transparent; font:inherit; font-size:15px; }
+.entry-line .small-btn { white-space:nowrap; }
+#new-deadline:not([hidden]) { margin:10px 0 0 30px; display:flex; flex-wrap:wrap; gap:12px; }
+#new-deadline label { font-size:12px; color:var(--muted); }
+#new-error:not(:empty) { display:block; margin:8px 0 0 30px; color:#9a322c; }
+.desktop-hint { font-size:12px; color:var(--muted); margin:0 0 12px; }
+.desktop-hint a { color:var(--ink); }

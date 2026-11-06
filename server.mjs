@@ -26,6 +26,7 @@ const localDay = () =>
 const assets = new Map([
   ["/", "index.html"],
   ["/app.js", "app.js"],
+  ["/samples.js", "samples.js"],
   ["/audio.js", "audio.js"],
   ["/calendar.js", "calendar.js"],
   ["/style.css", "style.css"],
@@ -277,11 +278,11 @@ export async function makeApp({ database, extractAI = claudeExtract } = {}) {
         req.headers.origin !== "http://" + host
       )
         throw fail("Different origin.", 403);
-      if (req.method === "GET" && url.pathname === "/api/state") {
+      if (req.method === "GET" && ["/api/state", "/api/version"].includes(url.pathname)) {
         const space = url.searchParams.get("space") || "demo";
         if (!["demo", "personal"].includes(space))
           throw fail("Unknown workspace.");
-        return json(200, view(space));
+        return json(200, url.pathname === "/api/version" ? {version: ledger.version(space)} : view(space));
       }
       if (req.method === "POST" && url.pathname === "/api/action")
         return json(200, await mutation(await readBody(req)));

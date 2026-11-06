@@ -58,6 +58,21 @@
         <div id="walkthrough"></div>
         <div class="columns">
           <section class="ledger-panel" aria-label="Workspace content">
+            <div id="task-tools" hidden>
+              <div class="panel-head task-toolbar"><h2>Task list</h2>
+                <div class="seg" aria-label="Task status"><button data-act="tab" data-id="open" id="open-tab">Open</button><button data-act="tab" data-id="closed" id="closed-tab">Closed</button></div>
+              </div>
+              <form id="new-task" class="task-card quick-row">
+                <div class="entry-line"><span class="entry-plus" aria-hidden="true">+</span>
+                  <input id="new-title" aria-label="New task title" maxlength="180" placeholder="New task…" autocomplete="off" required>
+                  <button type="button" id="set-due" class="icon-btn" aria-label="Set a deadline" title="Set a deadline" aria-controls="new-deadline" aria-expanded="false" data-icon="calendar"></button>
+                  <button class="small-btn" type="submit" aria-label="Add new task" title="Add task (Enter)">Add ↵</button>
+                </div>
+                <div id="new-deadline" hidden><label>Date <input type="date" id="new-date"></label><label>Time (optional) <input type="time" id="new-time"></label></div>
+                <small id="new-error" role="alert"></small>
+              </form>
+              <p id="desktop-hint" class="desktop-hint">Looking for a /Todo capture? <a href="/?space=personal">View personal tasks →</a></p>
+            </div>
             <div id="list"></div>
           </section>
           <section class="capture" id="capture" aria-labelledby="capture-title">

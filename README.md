@@ -21,7 +21,9 @@ Open [localhost:4317](http://127.0.0.1:4317/) in your browser. On Windows you ca
 3. You type **/Todo: Print two copies of the sponsor deck by Friday.** Printing becomes a separate task.
 4. Maya sends the deck herself. Jarvis closes the sending task and keeps the print job open.
 
-Switch to **Personal workspace** to try your own examples. Choose **+ Add task** to enter a title and an optional deadline directly. Check the circle beside a task to complete it. Manual tasks never call Claude.
+Switch to **Personal workspace** for your own tasks. Type in the **New task…** row and press Enter; the calendar icon adds an optional deadline. Check the circle beside a task to complete it. Manual tasks never call Claude. Desktop captures always go to [Personal tasks](http://127.0.0.1:4317/?space=personal) and appear automatically when the tab is visible.
+
+For a second demo, leave the engine on **Local rules**. Select **Meeting notes → Use example → Process source**, then do the same with **Email**. The Repair Café meeting gives you three jobs and gives Priya one. Only your three land on the list. Maya’s follow-up moves the entrance map to Wednesday at 3 pm, closes the printing task she finished, and adds two requests. Open the entrance-map task to see both sources.
 
 ## What you can capture
 

@@ -1,5 +1,6 @@
 import { openAudio } from "./audio.js";
 import { readCalendar } from "./calendar.js";
+import { captureExamples } from "./samples.js";
 const $ = (id) => document.getElementById(id);
 const esc = (value) =>
   String(value ?? "").replace(
@@ -61,9 +62,6 @@ const labels = {
   edit: "Edited",
 };
 const sample = {
-  meeting:
-    "Andy: I’ll draft the workshop agenda by Friday.\nMaya: I’ll book the meeting room.",
-  email: "Could you please submit the volunteer roster by Friday at 4 pm?",
   calendar: "Deadline: Submit the economics assignment by Monday at 5 pm.",
   quick: "/Todo: Return the library book by Friday.",
 };
@@ -84,10 +82,16 @@ const viewNames = {
   activity: "Activity",
 };
 const params = new URLSearchParams(location.search);
-let space = params.has("quick")
+let space = params.has("quick") || params.get("space") === "personal"
   ? "personal"
   : localStorage.getItem("jarvis-space") || localStorage.getItem("dayfold-space") || "demo";
 if (!["personal", "demo"].includes(space)) space = "demo";
+if (params.get("space") === "personal") {
+  localStorage.setItem("jarvis-space", space);
+  const url = new URL(location.href);
+  url.searchParams.delete("space");
+  history.replaceState(null, "", url);
+}
 let state,
   view = "tasks",
   tab = "open",
@@ -302,6 +306,15 @@ function render() {
   $("heading").textContent = $("crumb").textContent = viewNames[view];
   $("subtitle").textContent = descriptions[view];
   const d = state.demo;
+  $("task-tools").hidden = view !== "tasks";
+  $("desktop-hint").hidden = !d;
+  for (const [key, count] of [["open", open.length], ["closed", done.length]]) {
+    const btn = $(key + "-tab");
+    btn.textContent = (key === "open" ? "Open " : "Closed ") + count;
+    btn.classList.toggle("sel", key === tab);
+    btn.setAttribute("aria-pressed", String(key === tab));
+  }
+  $("new-task").querySelector('[type="submit"]').disabled = busy;
   $("walkthrough").innerHTML = d
     ? '<section class="walk"><div class="walk-icon">' +
       icon("route") +
@@ -332,15 +345,6 @@ function render() {
       .slice()
       .sort((a, b) => (a.due || "9999").localeCompare(b.due || "9999"));
     $("list").innerHTML =
-      '<div class="panel-head task-toolbar"><h2>Task list</h2><button class="small-btn" data-act="add">+ Add task</button><div class="seg" aria-label="Task status"><button class="' +
-      (tab === "open" ? "sel" : "") +
-      '" data-act="tab" data-id="open">Open ' +
-      open.length +
-      '</button><button class="' +
-      (tab === "closed" ? "sel" : "") +
-      '" data-act="tab" data-id="closed">Closed ' +
-      done.length +
-      "</button></div></div>" +
       '<div class="task-list">' +
       (tasks.map(taskRow).join("") ||
         empty(
@@ -481,17 +485,16 @@ function taskModal(task) {
       "</div>",
   );
 }
-function editTask(task = {}) {
-  const adding = !task.id;
+function editTask(task) {
   modal(
-    adding ? "Add task" : "Edit task",
+    "Edit task",
     '<form id="edit-form" class="modal-form"><label class="label" for="edit-title">Task title</label><input id="edit-title" required maxlength="180" value="' +
       esc(task.title) +
       '"><label class="label" for="edit-date">Deadline (optional)</label><input id="edit-date" type="date" value="' +
       esc(task.due?.slice(0, 10)) +
       '"><label class="label" for="edit-time">Time (optional)</label><input id="edit-time" type="time" value="' +
       esc(task.due?.slice(11)) +
-      '"><button class="primary">' + (adding ? "Add task" : "Save changes") + '</button><p class="form-error" role="alert" id="edit-error"></p></form>',
+      '"><button class="primary">Save changes</button><p class="form-error" role="alert" id="edit-error"></p></form>',
   );
   $("edit-title").focus();
   $("edit-form").onsubmit = async (e) => {
@@ -504,13 +507,12 @@ function editTask(task = {}) {
       return;
     }
     if (
-      await change(adding ? "add" : "edit", {
+      await change("edit", {
         target: task.id,
         title: $("edit-title").value,
         due: date ? date + (time ? "T" + time : "") : null,
       })
     ) {
-      if (adding) { tab = "open"; render(); toast("Task added"); }
       $("dialog").close();
     } else $("edit-error").textContent = $("form-error").textContent;
   };
@@ -667,7 +669,6 @@ document.addEventListener("click", async (e) => {
     render();
   }
   if (act === "source") selectSource(id, true);
-  if (act === "add" && !busy) editTask();
   if (act === "next") await change("next");
   if (act === "toggle") await change("toggle", { target: id });
   if (act === "task") taskModal(state.tasks.find((t) => t.id === id));
@@ -753,12 +754,45 @@ $("shortcut-help").onclick = () =>
   );
 $("example").onclick = () => {
   const type = $("source-type").value;
-  $("body").value = sample[type].replace(/^Andy:/, state.owner + ":");
+  const example = captureExamples(state.owner)[type];
+  $("body").value = example?.text || sample[type];
+  if (example) {
+    $("source-label").value = example.label;
+    $("author").value = example.author;
+    $("source-date").value = example.date;
+  }
   $("body").focus();
+};
+$("set-due").onclick = () => {
+  const panel = $("new-deadline");
+  panel.hidden = !panel.hidden;
+  $("set-due").setAttribute("aria-expanded", String(!panel.hidden));
+  if (!panel.hidden) $("new-date").focus();
+};
+$("new-task").onsubmit = async (event) => {
+  event.preventDefault();
+  if (busy || !state) return;
+  const title = $("new-title").value.trim(), date = $("new-date").value, time = $("new-time").value;
+  if (!title || (time && !date)) {
+    $("new-error").textContent = !title ? "Enter a task title." : "Choose a date for this time.";
+    if (time && !date && $("new-deadline").hidden) $("set-due").click();
+    $(!title ? "new-title" : "new-date").focus(); return;
+  }
+  $("new-error").textContent = "";
+  if (await change("add", {title, due: date ? date + (time ? "T" + time : "") : null})) {
+    $("new-task").reset();
+    $("new-deadline").hidden = true;
+    $("set-due").setAttribute("aria-expanded", "false");
+    tab = "open"; render(); toast("Task added"); $("new-title").focus();
+  } else $("new-error").textContent = $("form-error").textContent;
 };
 $("space").onchange = async () => {
   if (busy) return;
   stash();
+  $("new-task").reset();
+  $("new-error").textContent = "";
+  $("new-deadline").hidden = true;
+  $("set-due").setAttribute("aria-expanded", "false");
   space = $("space").value;
   localStorage.setItem("jarvis-space", space);
   view = "tasks";
@@ -802,19 +836,26 @@ $("dictate").onclick = () =>
       toast("Transcript ready. Review the text, then process the source.");
     },
   });
-window.addEventListener("focus", async () => {
-  if (!state || busy || $("dialog").open) return;
+let refreshing = false;
+async function refreshChanges() {
+  if (refreshing || document.hidden || !state || busy || $("dialog").open) return;
+  refreshing = true;
   const previous = space;
   try {
-    const fresh = await api("/api/state?space=" + space);
-    if (!busy && space === previous && fresh.version >= state.version) {
+    const {version} = await api("/api/version?space=" + previous);
+    if (space !== previous || busy || version <= state.version) return;
+    const fresh = await api("/api/state?space=" + previous);
+    if (!busy && !$("dialog").open && space === previous && fresh.version > state.version) {
       state = fresh;
       render();
     }
   } catch {
     /* A failed refresh leaves the last saved list visible. */
-  }
-});
+  } finally { refreshing = false; }
+}
+window.addEventListener("focus", refreshChanges);
+document.addEventListener("visibilitychange", refreshChanges);
+setInterval(refreshChanges, 2000);
 try {
   await reload();
   restore();

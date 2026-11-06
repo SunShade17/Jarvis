@@ -6,6 +6,7 @@ import path from "node:path";
 import { once } from "node:events";
 import { makeApp } from "../server.mjs";
 import { examples } from "../lib/scenario.mjs";
+import { captureExamples } from "../public/samples.js";
 import { localExtract, readDue, validDate } from "../lib/extract.mjs";
 import { checkedChanges, project, Ledger } from "../lib/ledger.mjs";
 import { claudeExtract } from "../lib/claude.mjs";
@@ -35,6 +36,19 @@ function replay(sources) {
   }
   return project(events);
 }
+test("Repair Café follow-up changes one deadline, closes printing and adds two requests", () => {
+  const sources = Object.entries(captureExamples()).map(([type, s]) => ({type, ...s}));
+  const first = replay(sources.slice(0, 1));
+  assert.equal(first.tasks.length, 3);
+  const final = replay(sources);
+  assert.deepEqual(final.tasks.filter(t=>!t.closed).map(t=>[t.title,t.due]), [
+    ["Send the entrance map to volunteers","2026-11-11T15:00"],
+    ["Confirm the first-aid kit location with the library","2026-11-10"],
+    ["Email the accessibility coordinator","2026-11-10T12:00"],
+    ["Bring the blue extension cord","2026-11-14"]
+  ]);
+  assert.deepEqual(final.tasks.filter(t=>t.closed).map(t=>t.title), ["Print the repair intake forms"]);
+});
 test("the seven-source interview replay keeps ownership, changes the deadline and closes only sending", () => {
   const state = replay(examples);
   assert.deepEqual(
