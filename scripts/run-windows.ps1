@@ -1,4 +1,4 @@
-param([switch]$Restart)
+param([switch]$Restart, [switch]$OpenBrowser)
 $ErrorActionPreference = "Stop"
 $jarvisRoot = Split-Path -Parent $PSScriptRoot
 $entry = Join-Path $jarvisRoot "server.mjs"
@@ -22,3 +22,4 @@ if (!$listener -or $Restart) {
     if ($serverProcess.HasExited) { throw "Jarvis could not start. Run node server.mjs in the project folder for details." }
 }
 Write-Host "Jarvis is running at http://127.0.0.1:$port/"
+if ($OpenBrowser) { Start-Process "http://127.0.0.1:$port/" }

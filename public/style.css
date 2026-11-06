@@ -1018,3 +1018,5 @@ code {
     display: none;
   }
 }
+.task-toolbar { flex-wrap: wrap; gap: .5rem; }
+.task-toolbar .seg { margin-left: auto; }

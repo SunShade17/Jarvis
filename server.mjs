@@ -191,14 +191,14 @@ export async function makeApp({ database, extractAI = claudeExtract } = {}) {
         useAI ? "Claude" : "Local rules",
       );
       ledger.append(space, version, key, event);
-    } else if (["toggle", "resolve", "edit"].includes(command)) {
+    } else if (["add", "toggle", "resolve", "edit"].includes(command)) {
       const original =
         command === "resolve"
           ? state.pending.find((p) => p.id === body.review)
           : null;
       if (command === "resolve" && !original)
         throw fail("That review was already resolved.");
-      const task = state.tasks.find((t) => t.id === body.target);
+      const task = command !== "add" && state.tasks.find((t) => t.id === body.target);
       let kind =
         command === "toggle"
           ? task?.closed
@@ -206,7 +206,7 @@ export async function makeApp({ database, extractAI = claudeExtract } = {}) {
             : "close"
           : command === "edit"
             ? "edit"
-            : body.kind;
+            : command === "add" ? "create" : body.kind;
       if (
         ![
           "reopen",
@@ -226,7 +226,7 @@ export async function makeApp({ database, extractAI = claudeExtract } = {}) {
       const due = body.due || null;
       if ((due && !validDate(due)) || (kind === "update" && !due))
         throw fail("Choose a valid deadline.");
-      if (command === "edit" && !clean(body.title, 180))
+      if (["add", "edit"].includes(command) && !clean(body.title, 180))
         throw fail("Enter a task title.");
       const title = clean(body.title, 180) || task?.title || original?.title;
       if (kind === "create" && !title) throw fail("Enter a task title.");
@@ -235,7 +235,7 @@ export async function makeApp({ database, extractAI = claudeExtract } = {}) {
         source: {
           type: "manual",
           date: localDay(),
-          label: original ? "Review decision" : "Task edited",
+          label: original ? "Review decision" : command === "add" ? "Task added" : "Task edited",
           text: original?.quote || title,
         },
         engine: "Manual",

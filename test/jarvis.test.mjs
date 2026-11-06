@@ -234,6 +234,15 @@ test("HTTP flow isolates demo, deduplicates, resolves ambiguity, edits, undoes, 
       assert.equal(res.status, 200, JSON.stringify(body));
       state = body;
     }
+    await act("add", { mode: "claude", title: "Print badges", due: "2026-11-20T09:30" });
+    assert.equal(state.tasks[0].title, "Print badges");
+    assert.equal(state.tasks[0].due, "2026-11-20T09:30");
+    assert.equal(state.events.at(-1).engine, "Manual");
+    await act("toggle", { target: state.tasks[0].id });
+    assert.equal(state.tasks[0].closed, true);
+    await act("undo");
+    await act("undo");
+    assert.equal(state.tasks.length, 0);
     const source = asSource(
       "/Todo: Write interview outline by Friday.",
       "quick",

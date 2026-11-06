@@ -4,7 +4,9 @@
 ; Start this script only when you want desktop capture enabled.
 ; A hotstring erases the trigger in ordinary editable controls and opens an
 ; explicit input box. Only the submitted box contents go to the local server.
-Hotstring(":*?:/Todo:", CaptureTask)
+Hotstring(":*:/Todo:", CaptureTask)
+Hotstring(":*:/Todo ", CaptureTask)
+^!j::CaptureTask()
 
 CaptureTask(*) {
     entry := InputBox("What do you need to do?", "Jarvis · Personal task", "w430 h130")

@@ -332,7 +332,7 @@ function render() {
       .slice()
       .sort((a, b) => (a.due || "9999").localeCompare(b.due || "9999"));
     $("list").innerHTML =
-      '<div class="panel-head"><h2>Task list</h2><div class="seg" aria-label="Task status"><button class="' +
+      '<div class="panel-head task-toolbar"><h2>Task list</h2><button class="small-btn" data-act="add">+ Add task</button><div class="seg" aria-label="Task status"><button class="' +
       (tab === "open" ? "sel" : "") +
       '" data-act="tab" data-id="open">Open ' +
       open.length +
@@ -346,7 +346,7 @@ function render() {
         empty(
           tab === "open" ? "No open tasks" : "No closed tasks",
           tab === "open"
-            ? "Capture a source to start your list."
+            ? "Add a task yourself or capture one from a source."
             : "Completed commitments appear here.",
         )) +
       "</div>" +
@@ -481,30 +481,38 @@ function taskModal(task) {
       "</div>",
   );
 }
-function editTask(task) {
+function editTask(task = {}) {
+  const adding = !task.id;
   modal(
-    "Edit task",
+    adding ? "Add task" : "Edit task",
     '<form id="edit-form" class="modal-form"><label class="label" for="edit-title">Task title</label><input id="edit-title" required maxlength="180" value="' +
       esc(task.title) +
-      '"><label class="label" for="edit-date">Deadline</label><input id="edit-date" type="date" value="' +
+      '"><label class="label" for="edit-date">Deadline (optional)</label><input id="edit-date" type="date" value="' +
       esc(task.due?.slice(0, 10)) +
       '"><label class="label" for="edit-time">Time (optional)</label><input id="edit-time" type="time" value="' +
       esc(task.due?.slice(11)) +
-      '"><button class="primary">Save changes</button><p class="form-error" id="edit-error"></p></form>',
+      '"><button class="primary">' + (adding ? "Add task" : "Save changes") + '</button><p class="form-error" role="alert" id="edit-error"></p></form>',
   );
+  $("edit-title").focus();
   $("edit-form").onsubmit = async (e) => {
     e.preventDefault();
     const date = $("edit-date").value,
       time = $("edit-time").value;
+    if (time && !date) {
+      $("edit-error").textContent = "Choose a date for this time.";
+      $("edit-date").focus();
+      return;
+    }
     if (
-      await change("edit", {
+      await change(adding ? "add" : "edit", {
         target: task.id,
         title: $("edit-title").value,
         due: date ? date + (time ? "T" + time : "") : null,
       })
-    )
+    ) {
+      if (adding) { tab = "open"; render(); toast("Task added"); }
       $("dialog").close();
-    else $("edit-error").textContent = $("form-error").textContent;
+    } else $("edit-error").textContent = $("form-error").textContent;
   };
 }
 function minutes(event) {
@@ -659,6 +667,7 @@ document.addEventListener("click", async (e) => {
     render();
   }
   if (act === "source") selectSource(id, true);
+  if (act === "add" && !busy) editTask();
   if (act === "next") await change("next");
   if (act === "toggle") await change("toggle", { target: id });
   if (act === "task") taskModal(state.tasks.find((t) => t.id === id));
@@ -740,7 +749,7 @@ $("calendar-file").onchange = async (e) => {
 $("shortcut-help").onclick = () =>
   modal(
     "Desktop capture",
-    '<p>On Windows, run <code>desktop/start-shortcut.cmd</code> while the Jarvis server is running. In an ordinary text field, type <strong>/Todo:</strong> to open a small capture box. Press Enter to save to your personal list.</p><p class="fine">First-time setup is in the README. Exit the AutoHotkey tray icon to turn the shortcut off.</p>',
+    '<p>On Windows, run <code>desktop/start-shortcut.cmd</code> while Jarvis is running. Type <strong>/Todo:</strong> or <strong>/todo</strong> then Space in a text field. Without a text field, press <strong>Ctrl + Alt + J</strong>.</p><p>Type your task in the box and press Enter to save it to your Personal workspace. Escape cancels.</p><p class="fine">First-time setup is in the README. Exit the AutoHotkey tray icon to turn capture off.</p>',
   );
 $("example").onclick = () => {
   const type = $("source-type").value;

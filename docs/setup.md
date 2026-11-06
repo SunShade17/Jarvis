@@ -18,7 +18,7 @@ You can also choose an audio file, start the microphone, or share a browser tab 
 
 ## Enable /Todo: on Windows
 
-Run `.\scripts\setup-windows.ps1 -Feature Shortcut` once and then `.\desktop\start-shortcut.cmd`. Keep the Jarvis server running. Type **/Todo:** in an ordinary text field to open the AutoHotkey capture box. Enter the task and press Enter. It goes to your **Personal workspace**. Exit the helper’s tray icon to disable it. Protected or elevated apps can block the shortcut.
+Run `.\scripts\setup-windows.ps1 -Feature Shortcut` once and then double-click `desktop/start-shortcut.cmd` when you want capture enabled. Keep the Jarvis server running. In an ordinary text field, type **/Todo:** or **/todo** followed by Space. Without a text field, press **Ctrl+Alt+J**. Enter the task in the box and press Enter, or press Escape to cancel. Only submitted text goes to Jarvis, always locally and into **Personal workspace**. Return to the browser to see it. Exit the helper’s tray icon to disable it; relaunch it after signing in again. Protected or elevated apps can block the shortcut.
 
 ## Storage and verification
 
